@@ -1,12 +1,13 @@
 import java.io.*;
 import java.util.*;
+import java.sql.*;
 
 class project_manager{
 	public void startBiz(){
 		int option;
 		String input;
 		System.out.println("1. Make Booking");
-		System.out.println("2. Update Tracking Status"); //send truck or free truck
+		System.out.println("2. Update Truck Status"); //send truck or free truck
 		System.out.println("3. View Order Status");
 		System.out.println("4. Exit");
 		Console c = System.console();
@@ -43,6 +44,7 @@ class project_manager{
 		String load;
 		String date;
 		double weight;
+		double remCapacityBeforeNew;
 		String allotTruck = "";
 		Console c = System.console();
 		System.out.println("");
@@ -54,6 +56,127 @@ class project_manager{
 		date = c.readLine("%s","date in dd/mm/yyyy?:");
 		
 		int flag = 0;
+		String query;
+		
+		PreparedStatement updateQuery = null;
+		
+		
+		
+		
+		
+		String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		String user = "sripada";
+		String pwd = "bhaskar";
+	
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(url,user,pwd);
+			System.out.println("Connection = " + conn);
+			query = "Select * from realTime where destination = ? AND status = 'Alloted'  AND remainingCapacity >= ?";
+			
+			updateQuery =  conn.prepareStatement(query);
+			updateQuery.setString(1,destination);
+			
+			updateQuery.setDouble(2,weight);
+			
+			
+			ResultSet rs = updateQuery.executeQuery();
+			
+			if(rs.next()) 
+			{
+				allotTruck = rs.getString("truckId");
+				remCapacityBeforeNew = rs.getDouble("remainingCapacity");
+				String updateRt = "UPDATE realTime SET remainingCapacity = ?  WHERE truckId = ? ";
+				 
+				PreparedStatement updateRealTime = conn.prepareStatement(updateRt);
+				updateRealTime.setDouble(1,remCapacityBeforeNew - weight);
+				updateRealTime.setString(2,allotTruck);
+				flag =1;
+				
+				// now updating challan in dbms
+				
+				project_challan currentChallan = new project_challan("abc",source,destination,customerName,date,allotTruck,rs.getString("driverName"),"Allotted",load);
+				
+				query = "INSERT INTO challanList(OrderId , source , destination ,customerName ,currentdate ,truckId , driverName ,status, luggageDetails)  values(?,?,?,?,?,?,?,?,?) ";
+				
+				updateQuery =  conn.prepareStatement(query);
+//				,,,getDate(),getTid(),getDN(),getSt(),get
+				updateQuery.setString(1,currentChallan.getOid());
+				updateQuery.setString(2,currentChallan.getSource());
+				updateQuery.setString(3,currentChallan.getDestination());
+				updateQuery.setString(4,currentChallan.getCN());
+				updateQuery.setString(5,currentChallan.getDate());
+				updateQuery.setString(6,currentChallan.getTid());
+				updateQuery.setString(7,currentChallan.getDN());
+				updateQuery.setString(8,currentChallan.getSt());
+				updateQuery.setString(9,currentChallan.getLuggageDetails());
+				
+				updateQuery.executeQuery();
+				
+				
+				
+				
+			}
+			
+			else if (flag == 0){
+				query = "Select * from realTime AND status = 'Available'  AND remainingCapacity >= ?";
+				
+				updateQuery =  conn.prepareStatement(query);
+				updateQuery.setDouble(1,weight);
+				ResultSet rs2 = updateQuery.executeQuery();
+				
+				if(rs2.next()){
+					allotTruck = rs2.getString("truckId");
+					remCapacityBeforeNew = rs2.getDouble("remainingCapacity");
+					String updateRt = "UPDATE realTime SET remainingCapacity = ? , status = 'Alloted'  WHERE truckId = ? ";
+					 
+					PreparedStatement updateRealTime = conn.prepareStatement(updateRt);
+					updateRealTime.setDouble(1,remCapacityBeforeNew - weight);
+					updateRealTime.setString(2,allotTruck);
+					
+					flag =1;
+					
+					project_challan currentChallan = new project_challan("abc",source,destination,customerName,date,allotTruck,rs.getString("driverName"),"Allotted",load);
+					
+					query = "INSERT INTO challanList(OrderId , source , destination ,customerName ,currentdate ,truckId , driverName ,status, luggageDetails)  values(?,?,?,?,?,?,?,?,?) ";
+					
+					updateQuery =  conn.prepareStatement(query);
+					updateQuery.setString(1,currentChallan.getOid());
+					updateQuery.setString(2,currentChallan.getSource());
+					updateQuery.setString(3,currentChallan.getDestination());
+					updateQuery.setString(4,currentChallan.getCN());
+					updateQuery.setString(5,currentChallan.getDate());
+					updateQuery.setString(6,currentChallan.getTid());
+					updateQuery.setString(7,currentChallan.getDN());
+					updateQuery.setString(8,currentChallan.getSt());
+					updateQuery.setString(9,currentChallan.getLuggageDetails());
+					
+					updateQuery.executeQuery();
+					
+				}
+				
+				else{
+					System.out.println("No trucks available");
+				}
+				
+				
+			}
+		
+		
+		}catch(SQLException | ClassNotFoundException e){
+		e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+	/*
 		for(project_realTime e: realTime){
 			if(e.getDest() == destination && e.getStatus() == "Allotted" && e.getRC() >= weight) {
 				allotTruck = e.getTid();
@@ -62,6 +185,9 @@ class project_manager{
 				flag = 1;
 			}
 		}
+		
+		
+		
 		if(flag == 0){
 			for(project_realTime e: realTime){
 			if(e.getStatus() == "Available" && e.getRC() >= weight) {
@@ -81,6 +207,11 @@ class project_manager{
 		if(flag == 0)
 			System.out.println("No trucks available");
 		}
+		
+				
+		*/
+		
+		
 		
 		
 	}
