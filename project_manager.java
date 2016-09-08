@@ -23,7 +23,7 @@ class project_manager{
 		switch (option) {
 			case 1: makeBooking(realTime, challanList);
 					break;
-			case 2: updateTracker(truckList, realTime, challanList);
+			case 2: updateTruck(truckList, realTime, challanList);
 					break;
 			case 3: checkStatus(challanList);
 					break;
@@ -216,18 +216,72 @@ class project_manager{
 		
 	}
 	
-	public void updateTracker(List<project_truck> truckList, List<project_realTime> realTime, List<project_challan> challanList){
+	public void updateTruck(List<project_truck> truckList, List<project_realTime> realTime, List<project_challan> challanList){
 		int option;
 		String input, tId;
 		System.out.println("");
 		System.out.println("1. Send a Truck");
-		System.out.println("2. Make a Truck available");
+		System.out.println("2. Truck reached the destination");
 		
 		Console c = System.console();
 		input = c.readLine("%s","option?:");
 		option = Integer.parseInt(input);
 		
+
+		String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		String user = "sripada";
+		String pwd = "bhaskar";
+//		PreparedStatement updateQuery = null;
+		
+		try {
+		Class.forName("com.mysql.jdbc.Driver");
+		Connection conn = DriverManager.getConnection(url,user,pwd);
+		System.out.println("Connection = " + conn);
 		switch (option) {
+			case 1:
+				tId = c.readLine("%s","Truck Id?:");
+				String updateRt = "UPDATE realTime SET , status = 'Busy'  WHERE truckId = ? ";
+				 
+				PreparedStatement updateRealTime = conn.prepareStatement(updateRt);
+				updateRealTime.setString(1,tId);
+				
+				
+				
+				String updateChallan = "UPDATE challanList SET , status = 'Started'  WHERE truckId = ? , status = 'Alloted'  "  ;
+				 
+				PreparedStatement updateChallanList = conn.prepareStatement(updateChallan);
+				updateChallanList.setString(1,tId);
+				
+				
+				
+				
+				
+				
+				
+			case 2:
+				
+				tId = c.readLine("%s","Truck Id?:");
+				updateRt = "UPDATE realTime SET , status = 'Available'  WHERE truckId = ? ";
+				 
+				 updateRealTime = conn.prepareStatement(updateRt);
+				updateRealTime.setString(1,tId);
+				
+				
+				
+				updateChallan = "UPDATE challanList SET , status = 'Reached'  WHERE truckId = ? , status = 'Alloted' OR 'Started'  "  ;
+				 
+				updateChallanList = conn.prepareStatement(updateChallan);
+				updateChallanList.setString(1,tId);
+				
+			
+		}
+		
+		}catch(SQLException  | ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		
+		
+		/*switch (option) {
 			case 1: tId = c.readLine("%s","Truck Id?:");
 					for(project_realTime e: realTime){
 						if(e.getTid() == tId)
@@ -235,7 +289,7 @@ class project_manager{
 					}
 					for(project_challan e: challanList){
 						if(e.getTid() == tId)
-							e.updateSt("Busy");
+							e.updateSt("Reached");
 					}
 					break;
 			case 2: tId = c.readLine("%s","Truck Id?:");
@@ -255,23 +309,74 @@ class project_manager{
 					}			
 					break;
 			default:
-		}
+		}*/
 	}
 	
 	public void checkStatus(List<project_challan> challanList){
 		String OrderId;
 		Console c = System.console();
 		OrderId = c.readLine("%s","OrderId?:");
+
+		String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		String user = "sripada";
+		String pwd = "bhaskar";
+		String query ="";
+		PreparedStatement updateQuery = null;
 		
-		for(project_challan e: challanList){
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(url,user,pwd);
+			System.out.println("Connection = " + conn);
+			
+			query = "Select * from challanList where OrderId = ? ";
+			
+			updateQuery =  conn.prepareStatement(query);
+			updateQuery.setString(1,OrderId);
+			
+					
+			
+			ResultSet rs = updateQuery.executeQuery();
+			
+			if(rs.next()) 
+			{
+				System.out.print(rs.getString(1) + " \t");
+				System.out.print(rs.getString(2) + " \t");
+				System.out.print(rs.getString(3) + " \t");
+				System.out.print(rs.getString(4) + " \t");
+				System.out.print(rs.getString(5) + " \t");
+				System.out.print(rs.getString(6) + " \t");
+				System.out.print(rs.getString(7) + " \t");
+				System.out.print(rs.getString(8) + " \t");
+				System.out.print(rs.getString(9) + " \t");
+				
+			
+			}
+			else System.out.println("Ivalid OrderId");
+			
+			
+		}catch(SQLException  | ClassNotFoundException e){
+			e.printStackTrace();
+		}
+		
+		
+		
+		
+		
+		
+		
+		/*for(project_challan e: challanList){
 			if(e.getOid() == OrderId)
 				System.out.println("Order status is "+e.getSt());
-		}
+		}*/
+		
+		
+		
+		
 		
 	}
 }
 
-//bhaskar edit
+
 
 
 	
