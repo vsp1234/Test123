@@ -17,3 +17,4 @@ class project_truck {
 		return capacity;
 	}
 }
+//bhaskar edit

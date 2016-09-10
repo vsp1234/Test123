@@ -1,3 +1,7 @@
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.*;
 
 class project_database{
@@ -10,6 +14,22 @@ class project_database{
 		truckList = new ArrayList<project_truck>();
 		project_truck refT = new project_truck(new project_driver("Bob"),"123",250.0);
 		truckList.add(refT);
+		
+	/*	String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		String user = "sripada";
+		String pwd = "bhaskar";
+	
+		try {
+			Class.forName("com.mysql.jdbc.Driver");
+			Connection conn = DriverManager.getConnection(url,user,pwd);
+			System.out.println("Connection = " + conn);
+			Statement stmt = conn.createStatement();
+		}catch(SQLException | ClassNotFoundException e){
+		e.printStackTrace();
+		}
+		
+		*/
+		
 		
 		//copy all from truckList with status as "Available"
 		realTime = new ArrayList<project_realTime>();
@@ -36,3 +56,5 @@ class project_database{
 		
 	}
 }
+
+//bhaskar edit

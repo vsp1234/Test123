@@ -12,7 +12,7 @@ class project_challan{
 	public project_challan() {}
 	
 	public project_challan(String OI, String s, String d, String cName, String dt, String td, String dN, String st, String lD){
-		OrderId = OI;
+		
 		source = s;
 		destination = d;
 		customerName = cName;
@@ -21,7 +21,11 @@ class project_challan{
 		driverName = dN;
 		status = st;
 		luggageDetails = lD;
+		OrderId = generateOrderId();
+		
 	}
+	
+	// getOid(),getSource(),getDestination(),getCN(),getDate(),getTid(),getDN(),getSt(),getLuggageDetails()
 	
 	public String toString(){
 		return (OrderId+source+destination+customerName+date+truckId+driverName+status);
@@ -39,5 +43,27 @@ class project_challan{
 	public String getOid(){
 		return OrderId;
 	}
+	public String getDestination(){
+		return destination;
+	}
+	public String getCN(){
+		return customerName;
+	}
+	public String getDate(){
+		return date;
+	}
+	public String getLuggageDetails(){
+		return luggageDetails;
+	}
+	public String getSource(){
+		return source;
+	}
+	public String getDN(){
+		return driverName;
+	}
 	
+
+	public String generateOrderId(){
+		return customerName + luggageDetails;
+	}
 }
