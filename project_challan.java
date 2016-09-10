@@ -12,7 +12,7 @@ class project_challan{
 	public project_challan() {}
 	
 	public project_challan(String OI, String s, String d, String cName, String dt, String td, String dN, String st, String lD){
-		OrderId = generateOrderId();
+		
 		source = s;
 		destination = d;
 		customerName = cName;
@@ -21,6 +21,7 @@ class project_challan{
 		driverName = dN;
 		status = st;
 		luggageDetails = lD;
+		OrderId = generateOrderId();
 		
 	}
 	

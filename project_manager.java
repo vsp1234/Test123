@@ -8,6 +8,16 @@ class project_manager
 {
 	public void startBiz()
 	{
+		System.out.println("WELCOME TO TRANSPORT MANAGEMENT SYSTEM");
+//		try
+//		{
+//		Runtime.getRuntime().exec("cls");
+//		}
+//		catch(IOException e)
+//		{
+//			e.printStackTrace();
+//		}
+		
 		int option;
 		String input;
 		System.out.println("1. Make Booking");
@@ -66,19 +76,20 @@ class project_manager
 		
 		try
 		{
-			customerName = c.readLine();
-			System.out.println("Customer Name: " + customerName);
-			source = c.readLine();
-			System.out.println("Source: " + source);
-			destination = c.readLine();
-			System.out.println("Destination: " + destination);
-			load = c.readLine();
-			System.out.println("Load: " + load);
-			weight = Double.parseDouble(load); 
-			System.out.println("Weight: " + weight);
-			date = c.readLine(/*"%s","date in dd/mm/yyyy?:"*/);
-			System.out.println("Date: " + date);
 			
+			System.out.println("Customer Name: " );
+			customerName = c.readLine();
+			System.out.println("Source: ");
+			source = c.readLine();
+			System.out.println("Destination: " );
+			destination = c.readLine();
+			System.out.println("Load: " );
+			load = c.readLine();
+			weight = Double.parseDouble(load); 
+		//	System.out.println("Weight: " + weight);
+			
+			System.out.println("Date: " );
+			date = c.readLine(/*"%s","date in dd/mm/yyyy?:"*/);
 			
 			int flag = 0;
 			String query;
@@ -94,7 +105,7 @@ class project_manager
 				Class.forName("com.mysql.jdbc.Driver");
 				Connection conn = DriverManager.getConnection(url,user,pwd);
 				System.out.println("Connection = " + conn);
-				query = "Select * from realTime where (destination = ? AND status = 'Alloted') AND remainingCapacity >= ?";				
+				query = "Select * from realTime where (destination = ? AND status = 'Allotted') AND remainingCapacity >= ?";				
 				updateQuery = conn.prepareStatement(query);
 				updateQuery.setString(1,destination);
 				updateQuery.setDouble(2,weight);						
@@ -147,11 +158,12 @@ class project_manager
 						allotTruck = rs2.getString("truckId");
 						remCapacityBeforeNew = rs2.getDouble("remainingCapacity");
 						driverNam = rs2.getString("driverName");
-						String updateRt = "UPDATE realTime SET remainingCapacity = ? , status = 'Alloted' WHERE truckId = ? ";
+						String updateRt = "UPDATE realTime SET destination = ?, remainingCapacity = ? , status = 'Allotted' WHERE truckId = ? ";
 						 
 						PreparedStatement updateRealTime = conn.prepareStatement(updateRt);
-						updateRealTime.setDouble(1,remCapacityBeforeNew - weight);
-						updateRealTime.setString(2,allotTruck);
+						updateRealTime.setString(1,destination);
+						updateRealTime.setDouble(2,remCapacityBeforeNew - weight);
+						updateRealTime.setString(3,allotTruck);
 						flag = 1;
 						
 						updateRealTime.executeUpdate();
@@ -235,63 +247,84 @@ class project_manager
 	public void updateTruck(List<project_truck> truckList, List<project_realTime> realTime, List<project_challan> challanList){
 		int option;
 		String input, tId;
-		System.out.println("");
-		System.out.println("1. Send a Truck");
-		System.out.println("2. Truck reached the destination");
+		System.out.println("\n");
+		System.out.println("1. Release truck towards destination");
+		System.out.println("2. Truck reached destination");
+		System.out.println("3. Truck returned to source");
+		BufferedReader c = new BufferedReader(new InputStreamReader(System.in));
+		//Console c = System.console();
 		
-		Console c = System.console();
-		input = c.readLine("%s","option?:");
+		try{
+		input = c.readLine();
 		option = Integer.parseInt(input);
 		
 
-		String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		String url = "jdbc:mysql://10.14.4.132 /BHASKARDATABASE";//10.14.5.88:1521
 		String user = "sripada";
 		String pwd = "bhaskar";
 //		PreparedStatement updateQuery = null;
 		
-		try {
+		
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection conn = DriverManager.getConnection(url,user,pwd);
 		System.out.println("Connection = " + conn);
 		switch (option) {
 			case 1:
-				tId = c.readLine("%s","Truck Id?:");
-				String updateRt = "UPDATE realTime SET , status = 'Busy'  WHERE truckId = ? ";
-				 
+				System.out.println("Truck Id?:");
+				tId = c.readLine();
+				
+				String updateRt = "UPDATE realTime SET status = 'Busy' WHERE truckId = ? "; 
 				PreparedStatement updateRealTime = conn.prepareStatement(updateRt);
 				updateRealTime.setString(1,tId);
+				updateRealTime.executeUpdate();
 				
+//				System.out.println("YO!!");
 				
-				
-				String updateChallan = "UPDATE challanList SET , status = 'Started'  WHERE truckId = ? , status = 'Alloted'  "  ;
-				 
+				String updateChallan = "UPDATE challanList SET status = 'Started'  WHERE truckId = ? AND status = 'Allotted'  "  ; 
 				PreparedStatement updateChallanList = conn.prepareStatement(updateChallan);
 				updateChallanList.setString(1,tId);
+				updateChallanList.executeUpdate();
 				
-			
+//				System.out.println("YO1!!");
+				break;
 				
 			case 2:
+				System.out.println("Truck Id?:");
+				tId = c.readLine();
 				
-				tId = c.readLine("%s","Truck Id?:");
-				updateRt = "UPDATE realTime SET , status = 'Available'  WHERE truckId = ? ";
-				 
-				 updateRealTime = conn.prepareStatement(updateRt);
+				updateRt = "UPDATE realTime rt, trucklist t SET status = 'Returning', rt.remainingCapacity = t.Capacity WHERE rt.truckId = ? ";
+				updateRealTime = conn.prepareStatement(updateRt);
 				updateRealTime.setString(1,tId);
+				updateRealTime.executeUpdate();
 				
+//				System.out.println("YO!!");
 				
-				
-				updateChallan = "UPDATE challanList SET , status = 'Reached'  WHERE truckId = ? , status = 'Alloted' OR 'Started'  "  ;
-				 
+				updateChallan = "UPDATE challanList SET status = 'Delivered'  WHERE ((truckId = ?) AND (status != 'Delivered' )) "  ; 
 				updateChallanList = conn.prepareStatement(updateChallan);
 				updateChallanList.setString(1,tId);
+				updateChallanList.executeUpdate();
 				
+//				System.out.println("YO1!!");
+				break;
+				
+			case 3:
+				System.out.println("Truck Id?:");
+				tId = c.readLine();
+				
+				updateRt = "UPDATE realTime rt, trucklist t SET status = 'Available', rt.remainingCapacity = t.Capacity WHERE rt.truckId = ? "; 
+				updateRealTime = conn.prepareStatement(updateRt);
+				updateRealTime.setString(1,tId);
+				updateRealTime.executeUpdate();
+				
+//				System.out.println("YO!!");
+				
+				break;
 			
 		}
 		
-		}catch(SQLException  | ClassNotFoundException e){
-			e.printStackTrace();
+		}catch(SQLException  | ClassNotFoundException | IOException e){
+						e.printStackTrace();
 		}
-		
 		
 		/*switch (option) {
 			case 1: tId = c.readLine("%s","Truck Id?:");
@@ -326,16 +359,18 @@ class project_manager
 	
 	public void checkStatus(List<project_challan> challanList){
 		String OrderId;
-		Console c = System.console();
-		OrderId = c.readLine("%s","OrderId?:");
-
-		String url = "jdbc:mysql://10.14.4.132 /USER12";//10.14.5.88:1521
+		BufferedReader c = new BufferedReader(new InputStreamReader(System.in));
+		System.out.println("OrderId?:");
+		try {
+		OrderId = c.readLine();
+		
+		String url = "jdbc:mysql://10.14.4.132 /BHASKARDATABASE";//10.14.5.88:1521
 		String user = "sripada";
 		String pwd = "bhaskar";
 		String query ="";
 		PreparedStatement updateQuery = null;
 		
-		try {
+		
 			Class.forName("com.mysql.jdbc.Driver");
 			Connection conn = DriverManager.getConnection(url,user,pwd);
 			System.out.println("Connection = " + conn);
@@ -366,7 +401,7 @@ class project_manager
 			else System.out.println("Ivalid OrderId");
 			
 			
-		}catch(SQLException  | ClassNotFoundException e){
+		}catch(SQLException  | ClassNotFoundException  | IOException e){
 			e.printStackTrace();
 		}
 		
